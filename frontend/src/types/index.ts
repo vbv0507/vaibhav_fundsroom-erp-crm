@@ -61,3 +61,30 @@ export interface PaginatedMeta {
   limit: number;
   totalPages: number;
 }
+
+// ─── Challan ──────────────────────────────────────────────────────────────────
+
+export type ChallanStatus = 'DRAFT' | 'CONFIRMED' | 'CANCELLED';
+
+export interface ChallanItem {
+  id: string;
+  challanId: string;
+  productId: string;
+  productNameSnapshot: string;
+  productSkuSnapshot: string;
+  unitPriceSnapshot: string;
+  quantity: number;
+}
+
+export interface Challan {
+  id: string;
+  challanNumber: string;
+  customerId: string;
+  status: ChallanStatus;
+  totalQuantity: number;
+  createdBy: string;
+  createdAt: string;
+  customer?: { id: string; name: string; businessName: string | null };
+  user?: { id: string; name: string; role: string };
+  challanItems?: ChallanItem[];
+}

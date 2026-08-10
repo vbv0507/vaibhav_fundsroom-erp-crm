@@ -6,7 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import Products from './pages/Products';
-import PlaceholderPage from './pages/PlaceholderPage';
+import Challans from './pages/Challans';
 
 export default function App() {
   return (
@@ -27,16 +27,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/products" element={<Products />} />
-            <Route
-              path="/challans"
-              element={
-                <PlaceholderPage
-                  title="Challans"
-                  icon="📄"
-                  description="Sales Challan module — create, confirm, and cancel delivery challans."
-                />
-              }
-            />
+            <Route path="/challans" element={<Challans />} />
           </Route>
 
           {/* Catch-all redirect */}
