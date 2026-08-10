@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 
 const roleDescriptions: Record<string, string> = {
   ADMIN: 'Full access to all modules — customers, products, challans, and settings.',
@@ -17,6 +20,60 @@ const roleColors: Record<string, { bg: string; text: string; dot: string }> = {
 export default function Dashboard() {
   const { user } = useAuth();
   const roleColor = roleColors[user?.role ?? ''] ?? roleColors['ACCOUNTS'];
+
+  const [stats, setStats] = useState<{
+    customers: number | string | null;
+    products: number | string | null;
+    challans: number | string | null;
+    lowStock: number | string | null;
+  }>({
+    customers: null,
+    products: null,
+    challans: null,
+    lowStock: null,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchStats = async () => {
+      try {
+        const [custRes, prodRes, chalRes, lowStockRes] = await Promise.allSettled([
+          api.get('/customers?limit=1'),
+          api.get('/products?limit=1'),
+          api.get('/challans?limit=1'),
+          api.get('/products?lowStock=true&limit=1')
+        ]);
+
+        if (isMounted) {
+          setStats({
+            customers: custRes.status === 'fulfilled' ? custRes.value.data.meta.total : '—',
+            products: prodRes.status === 'fulfilled' ? prodRes.value.data.meta.total : '—',
+            challans: chalRes.status === 'fulfilled' ? chalRes.value.data.meta.total : '—',
+            lowStock: lowStockRes.status === 'fulfilled' ? lowStockRes.value.data.meta.total : '—',
+          });
+        }
+      } catch (error) {
+        if (isMounted) {
+          setStats({
+            customers: '—',
+            products: '—',
+            challans: '—',
+            lowStock: '—',
+          });
+        }
+      }
+    };
+
+    fetchStats();
+    return () => { isMounted = false; };
+  }, []);
+
+  const statCards = [
+    { label: 'Customers', icon: '👥', value: stats.customers, path: '/customers' },
+    { label: 'Products', icon: '📦', value: stats.products, path: '/products' },
+    { label: 'Challans', icon: '📄', value: stats.challans, path: '/challans' },
+    { label: 'Low Stock', icon: '⚠️', value: stats.lowStock, path: '/products?lowStock=true' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -49,30 +106,23 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Quick stats placeholder cards */}
+      {/* Quick stats cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          { label: 'Customers', icon: '👥', value: '—' },
-          { label: 'Products', icon: '📦', value: '—' },
-          { label: 'Challans', icon: '📄', value: '—' },
-          { label: 'Low Stock', icon: '⚠️', value: '—' },
-        ].map((stat) => (
-          <div
+        {statCards.map((stat) => (
+          <Link
             key={stat.label}
-            className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-2"
+            to={stat.path}
+            className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col gap-2 hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group block"
           >
-            <span className="text-2xl">{stat.icon}</span>
-            <p className="text-2xl font-bold text-slate-800">{stat.value}</p>
+            <span className="text-2xl group-hover:scale-110 transition-transform origin-left">{stat.icon}</span>
+            {stat.value === null ? (
+              <div className="h-8 w-16 bg-slate-200 animate-pulse rounded mt-1 mb-1"></div>
+            ) : (
+              <p className="text-2xl font-bold text-slate-800">{stat.value}</p>
+            )}
             <p className="text-xs text-slate-500 font-medium">{stat.label}</p>
-          </div>
+          </Link>
         ))}
-      </div>
-
-      {/* Placeholder message */}
-      <div className="bg-white rounded-xl border border-dashed border-slate-300 p-8 text-center">
-        <p className="text-slate-400 text-sm">
-          Module pages for Customers, Products, and Challans will be implemented in the next phase.
-        </p>
       </div>
     </div>
   );
