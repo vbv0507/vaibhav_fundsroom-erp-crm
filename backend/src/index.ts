@@ -4,11 +4,16 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+import authRoutes from './routes/auth.routes';
+
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Routes
+app.use('/auth', authRoutes);
 
 // Standard API response shape
 interface ApiResponse<T = any> {
