@@ -6,6 +6,7 @@ dotenv.config();
 
 import authRoutes from './routes/auth.routes';
 import customerRoutes from './routes/customer.routes';
+import productRoutes from './routes/product.routes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -16,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use('/auth', authRoutes);
 app.use('/customers', customerRoutes);
+app.use('/products', productRoutes);
 
 // Standard API response shape
 interface ApiResponse<T = any> {
