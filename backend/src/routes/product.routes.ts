@@ -265,7 +265,7 @@ router.post('/:id/stock-movement', requireAuth, requireRole('ADMIN', 'WAREHOUSE'
         });
 
         return { product: updatedProduct, movement };
-      });
+      }, { timeout: 15000 });
 
       res.status(201).json({ success: true, data: result.movement });
     } catch (txError: any) {

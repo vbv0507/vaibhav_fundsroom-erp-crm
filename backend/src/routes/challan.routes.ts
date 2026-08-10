@@ -162,7 +162,7 @@ router.put('/:id/confirm', requireAuth, requireRole('ADMIN', 'SALES'), async (re
         });
 
         return updatedChallan;
-      });
+      }, { timeout: 15000 });
 
       res.json({ success: true, data: result });
     } catch (txError: any) {
@@ -245,7 +245,7 @@ router.put('/:id/cancel', requireAuth, requireRole('ADMIN', 'SALES'), async (req
         });
 
         return updatedChallan;
-      });
+      }, { timeout: 15000 });
 
       res.json({ success: true, data: result });
     } catch (txError: any) {
