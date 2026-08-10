@@ -203,16 +203,23 @@ A Postman collection covering all 17 API endpoints is included at the project ro
 
 ## Deployment
 
-> **TODO — Phase 9**
->
-> Deployment instructions for the chosen cloud platform (AWS / Railway / Render / Vercel) will be added here in Phase 9, including:
->
-> - Backend: containerised Express API deployment
-> - Frontend: static build deployment (Vercel / S3 + CloudFront)
-> - Database: production Neon project setup
-> - CI/CD pipeline configuration
-> - Environment variable management in production
-> - Domain and HTTPS setup
+This project is deployed and live.
+
+- **Database**: Neon (serverless Postgres) — see the Architecture section.
+- **Backend**: Deployed to Render as a Web Service.
+  - Root directory: `backend`
+  - Build command: `npm install && npx prisma generate && npm run build`
+  - Start command: `npm start`
+  - Environment variables set in Render dashboard: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN`
+  - *Note*: The free tier spins down after inactivity. A GitHub Actions keep-alive workflow (`.github/workflows/keep-alive.yml`) pings the `/health` endpoint every 5 minutes to reduce cold starts.
+- **Frontend**: Deployed to Vercel.
+  - Root directory: `frontend`
+  - Framework auto-detected as Vite.
+  - Environment variable: `VITE_API_URL` set to the deployed Render backend URL.
+  - Includes a `vercel.json` rewrite rule to support client-side routing (React Router) on direct URL navigation.
+- **Live URLs**:
+  - **Frontend**: https://vaibhav-fundsroom-erp-crm.vercel.app
+  - **Backend**: https://vaibhav-fundsroom-erp-crm.onrender.com
 
 ---
 
