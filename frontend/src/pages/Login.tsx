@@ -103,9 +103,39 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-slate-400 text-xs pb-6 px-8">
-            Demo app — credentials set during seed
-          </p>
+          {/* Demo Credentials */}
+          <div className="border-t border-slate-100 bg-slate-50 px-8 py-4">
+            <details className="group">
+              <summary className="cursor-pointer text-center text-xs font-medium text-slate-500 hover:text-violet-600 transition-colors list-none flex items-center justify-center gap-1 [&::-webkit-details-marker]:hidden">
+                <span>Show demo credentials</span>
+                <span className="transition-transform group-open:rotate-180 text-[10px]">▼</span>
+              </summary>
+              <div className="mt-3 space-y-2">
+                {[
+                  { role: 'ADMIN', email: 'admin@example.com' },
+                  { role: 'SALES', email: 'sales@example.com' },
+                  { role: 'WAREHOUSE', email: 'warehouse@example.com' },
+                  { role: 'ACCOUNTS', email: 'accounts@example.com' },
+                ].map((acc) => (
+                  <button
+                    key={acc.role}
+                    type="button"
+                    onClick={() => {
+                      setEmail(acc.email);
+                      setPassword('password123');
+                    }}
+                    className="w-full flex justify-between items-center bg-white border border-slate-200 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 rounded px-3 py-2 text-xs transition-colors text-left"
+                  >
+                    <span className="font-semibold text-slate-700 group-hover:text-violet-700">{acc.role}</span>
+                    <span className="text-slate-500">{acc.email}</span>
+                  </button>
+                ))}
+                <p className="text-[10px] text-center text-slate-400 pt-1">
+                  Password for all roles: <strong>password123</strong>
+                </p>
+              </div>
+            </details>
+          </div>
         </div>
       </div>
     </div>
