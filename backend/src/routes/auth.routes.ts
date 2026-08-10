@@ -20,7 +20,7 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction): P
       res.status(400).json({ 
         success: false, 
         error: 'Validation failed', 
-        details: parseResult.error.errors 
+        details: parseResult.error.issues 
       });
       return;
     }
