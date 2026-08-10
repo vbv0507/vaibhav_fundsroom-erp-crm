@@ -23,6 +23,7 @@ model User {
   createdAt      DateTime        @default(now())
   stockMovements StockMovement[]
   challans       Challan[]
+  customerNotes  CustomerNote[]
 }
 
 enum CustomerType {
@@ -48,9 +49,20 @@ model Customer {
   address      String?
   status       CustomerStatus
   followUpDate DateTime?
-  notes        String?
   createdAt    DateTime       @default(now())
   challans     Challan[]
+  notes        CustomerNote[]
+}
+
+model CustomerNote {
+  id         String   @id @default(uuid())
+  text       String
+  customerId String
+  createdBy  String
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  user     User     @relation(fields: [createdBy], references: [id])
 }
 
 model Product {
