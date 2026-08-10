@@ -4,6 +4,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Customers from './pages/Customers';
+import Products from './pages/Products';
 import PlaceholderPage from './pages/PlaceholderPage';
 
 export default function App() {
@@ -23,26 +25,8 @@ export default function App() {
             }
           >
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route
-              path="/customers"
-              element={
-                <PlaceholderPage
-                  title="Customers"
-                  icon="👥"
-                  description="Customer CRM module — list, create, and manage customers with notes history."
-                />
-              }
-            />
-            <Route
-              path="/products"
-              element={
-                <PlaceholderPage
-                  title="Products"
-                  icon="📦"
-                  description="Product & inventory module — manage products and track stock movements."
-                />
-              }
-            />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/products" element={<Products />} />
             <Route
               path="/challans"
               element={
