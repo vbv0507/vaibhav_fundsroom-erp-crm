@@ -1,13 +1,64 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import PlaceholderPage from './pages/PlaceholderPage';
 
-function App() {
+export default function App() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center text-blue-600 mb-6">Mini ERP+CRM Portal</h1>
-        <p className="text-gray-600 text-center">Frontend is successfully connected and Tailwind CSS is working!</p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Public route */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Protected routes inside app shell */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route
+              path="/customers"
+              element={
+                <PlaceholderPage
+                  title="Customers"
+                  icon="👥"
+                  description="Customer CRM module — list, create, and manage customers with notes history."
+                />
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <PlaceholderPage
+                  title="Products"
+                  icon="📦"
+                  description="Product & inventory module — manage products and track stock movements."
+                />
+              }
+            />
+            <Route
+              path="/challans"
+              element={
+                <PlaceholderPage
+                  title="Challans"
+                  icon="📄"
+                  description="Sales Challan module — create, confirm, and cancel delivery challans."
+                />
+              }
+            />
+          </Route>
+
+          {/* Catch-all redirect */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
-
-export default App;
