@@ -1,0 +1,71 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Typecheck Backend
+        working-directory: ./backend
+        run: npx tsc --noEmit
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Typecheck Frontend
+        working-directory: ./frontend
+        run: npx tsc --noEmit
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Trigger Render Backend Deployment
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$RENDER_DEPLOY_HOOK" ]; then
+            echo "Triggering backend deployment..."
+            curl -X POST "$RENDER_DEPLOY_HOOK"
+          else
+            echo "RENDER_DEPLOY_HOOK_URL secret is not set, skipping backend deploy."
+          fi
+
+      - name: Trigger Vercel Frontend Deployment
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
+            echo "Triggering frontend deployment..."
+            curl -X POST "$VERCEL_DEPLOY_HOOK"
+          else
+            echo "VERCEL_DEPLOY_HOOK_URL secret is not set, skipping frontend deploy."
+          fi
