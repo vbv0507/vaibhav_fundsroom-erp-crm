@@ -103,6 +103,26 @@ const emptyLine = (): LineItem => ({
 export default function Challans() {
   const { user } = useAuth();
   const canWrite = user?.role === 'ADMIN' || user?.role === 'SALES';
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const handlePdfDownload = async (challanId: string, challanNumber: string) => {
+    setPdfLoading(true);
+    try {
+      const response = await api.get(`/challans/${challanId}/pdf`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice-${challanNumber}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   const [challans, setChallans] = useState<Challan[]>([]);
   const [meta, setMeta] = useState<PaginatedMeta>({ total: 0, page: 1, limit: 10, totalPages: 1 });
@@ -656,14 +676,13 @@ export default function Challans() {
 
                 {detailChallan.status === 'CONFIRMED' && (
                   <div className="flex flex-wrap items-center gap-3">
-                    <a
-                      href={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/challans/${detailChallan.id}/pdf`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors"
+                    <button
+                      onClick={() => void handlePdfDownload(detailChallan.id, detailChallan.challanNumber)}
+                      disabled={pdfLoading}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
                     >
-                      <span>📥</span> Export PDF Invoice
-                    </a>
+                      <span>📥</span> {pdfLoading ? 'Generating…' : 'Export PDF Invoice'}
+                    </button>
                     <button
                       onClick={() => setCancelConfirmOpen(true)}
                       disabled={actionLoading}
