@@ -6,8 +6,16 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
-    { "key": "token",   "value": "", "type": "string" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
   ],
   "item": [
     {
@@ -31,8 +39,22 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}"
@@ -44,9 +66,146 @@
           "name": "GET /auth/me",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth","me"] },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
             "description": "Returns the currently authenticated user's profile. Requires a valid Bearer token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Lists all users in the system. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "POST /users",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"new@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"SALES\"\n}"
+            },
+            "description": "Creates a new user. Requires ADMIN role. role can be ADMIN, SALES, WAREHOUSE, ACCOUNTS."
+          }
+        },
+        {
+          "name": "PUT /users/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<user-uuid>"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\",\n  \"role\": \"WAREHOUSE\"\n}"
+            },
+            "description": "Updates a user. Optional: send 'password' to change it. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "DELETE /users/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<user-uuid>"
+                }
+              ]
+            },
+            "description": "Deletes a user. Cannot delete yourself. Requires ADMIN role."
           }
         }
       ]
@@ -59,10 +218,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/customers", "host": ["{{baseUrl}}"], "path": ["customers"] },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Ravi Kumar\",\n  \"mobile\": \"+919876543210\",\n  \"email\": \"ravi@example.com\",\n  \"businessName\": \"Kumar Traders\",\n  \"gstNumber\": \"29ABCDE1234F1Z5\",\n  \"customerType\": \"WHOLESALE\",\n  \"address\": \"42 MG Road, Bengaluru\",\n  \"status\": \"ACTIVE\",\n  \"followUpDate\": \"2025-09-01\"\n}"
@@ -74,17 +247,44 @@
           "name": "GET /customers",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/customers?page=1&limit=10&q=Kumar&status=ACTIVE&type=WHOLESALE",
-              "host": ["{{baseUrl}}"],
-              "path": ["customers"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ],
               "query": [
-                { "key": "page",   "value": "1" },
-                { "key": "limit",  "value": "10" },
-                { "key": "q",      "value": "Kumar", "description": "Search by name, mobile, or businessName" },
-                { "key": "status", "value": "ACTIVE", "description": "Filter: LEAD | ACTIVE | INACTIVE" },
-                { "key": "type",   "value": "WHOLESALE", "description": "Filter: RETAIL | WHOLESALE | DISTRIBUTOR" }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "q",
+                  "value": "Kumar",
+                  "description": "Search by name, mobile, or businessName"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "description": "Filter: LEAD | ACTIVE | INACTIVE"
+                },
+                {
+                  "key": "type",
+                  "value": "WHOLESALE",
+                  "description": "Filter: RETAIL | WHOLESALE | DISTRIBUTOR"
+                }
               ]
             },
             "description": "Lists customers with pagination and optional search/filter. All authenticated roles can access."
@@ -94,12 +294,28 @@
           "name": "GET /customers/:id",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/customers/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["customers",":id"],
-              "variable": [{ "key": "id", "value": "<customer-uuid>", "description": "Customer UUID" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<customer-uuid>",
+                  "description": "Customer UUID"
+                }
+              ]
             },
             "description": "Returns full customer detail including complete notes history."
           }
@@ -109,14 +325,30 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/customers/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["customers",":id"],
-              "variable": [{ "key": "id", "value": "<customer-uuid>" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<customer-uuid>"
+                }
+              ]
             },
             "body": {
               "mode": "raw",
@@ -130,14 +362,31 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/customers/:id/notes",
-              "host": ["{{baseUrl}}"],
-              "path": ["customers",":id","notes"],
-              "variable": [{ "key": "id", "value": "<customer-uuid>" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                ":id",
+                "notes"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<customer-uuid>"
+                }
+              ]
             },
             "body": {
               "mode": "raw",
@@ -156,10 +405,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Wireless Mouse\",\n  \"sku\": \"WM-001\",\n  \"category\": \"Electronics\",\n  \"unitPrice\": 25.99,\n  \"currentStock\": 0,\n  \"minStockAlert\": 10,\n  \"location\": \"Aisle 3\"\n}"
@@ -171,17 +434,44 @@
           "name": "GET /products",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/products?page=1&limit=10&q=Mouse&category=Electronics&lowStock=true",
-              "host": ["{{baseUrl}}"],
-              "path": ["products"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
               "query": [
-                { "key": "page",      "value": "1" },
-                { "key": "limit",     "value": "10" },
-                { "key": "q",         "value": "Mouse", "description": "Search by name or SKU" },
-                { "key": "category",  "value": "Electronics", "description": "Exact category filter" },
-                { "key": "lowStock",  "value": "true", "description": "Set true to return only products where currentStock <= minStockAlert" }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "q",
+                  "value": "Mouse",
+                  "description": "Search by name or SKU"
+                },
+                {
+                  "key": "category",
+                  "value": "Electronics",
+                  "description": "Exact category filter"
+                },
+                {
+                  "key": "lowStock",
+                  "value": "true",
+                  "description": "Set true to return only products where currentStock <= minStockAlert"
+                }
               ]
             },
             "description": "Lists products with pagination, search, category filter, and low-stock toggle. All authenticated roles can access."
@@ -191,12 +481,27 @@
           "name": "GET /products/:id",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/products/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["products",":id"],
-              "variable": [{ "key": "id", "value": "<product-uuid>" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<product-uuid>"
+                }
+              ]
             },
             "description": "Returns full product detail including the last 20 stock movements, most recent first."
           }
@@ -206,14 +511,30 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/products/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["products",":id"],
-              "variable": [{ "key": "id", "value": "<product-uuid>" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<product-uuid>"
+                }
+              ]
             },
             "body": {
               "mode": "raw",
@@ -227,20 +548,107 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/products/:id/stock-movement",
-              "host": ["{{baseUrl}}"],
-              "path": ["products",":id","stock-movement"],
-              "variable": [{ "key": "id", "value": "<product-uuid>" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                ":id",
+                "stock-movement"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<product-uuid>"
+                }
+              ]
             },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"quantityChanged\": 50,\n  \"movementType\": \"IN\",\n  \"reason\": \"Supplier delivery — PO #1234\"\n}"
             },
             "description": "Records a stock movement. Requires ADMIN or WAREHOUSE role.\n\nmovementType: IN (adds stock) | OUT (deducts stock)\nThe API enforces non-negative stock — an OUT movement that would result in negative stock is rejected with 400."
+          }
+        },
+        {
+          "name": "POST /products/:id/image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/:id/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                ":id",
+                "image"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<product-uuid>"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "description": "Uploads a product image to AWS S3. Requires ADMIN or WAREHOUSE role. Use multipart/form-data with an 'image' file field."
+          }
+        },
+        {
+          "name": "DELETE /products/:id/image",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/:id/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                ":id",
+                "image"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<product-uuid>"
+                }
+              ]
+            },
+            "description": "Deletes a product image from S3. Requires ADMIN or WAREHOUSE role."
           }
         }
       ]
@@ -253,10 +661,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/challans", "host": ["{{baseUrl}}"], "path": ["challans"] },
+            "url": {
+              "raw": "{{baseUrl}}/challans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "challans"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"customerId\": \"<customer-uuid>\",\n  \"items\": [\n    { \"productId\": \"<product-uuid-1>\", \"quantity\": 5 },\n    { \"productId\": \"<product-uuid-2>\", \"quantity\": 3 }\n  ]\n}"
@@ -268,16 +690,39 @@
           "name": "GET /challans",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/challans?page=1&limit=10&status=DRAFT&customerId=<uuid>",
-              "host": ["{{baseUrl}}"],
-              "path": ["challans"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "challans"
+              ],
               "query": [
-                { "key": "page",       "value": "1" },
-                { "key": "limit",      "value": "10" },
-                { "key": "status",     "value": "DRAFT", "description": "Filter: DRAFT | CONFIRMED | CANCELLED" },
-                { "key": "customerId", "value": "<uuid>", "description": "Filter by customer UUID" }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "DRAFT",
+                  "description": "Filter: DRAFT | CONFIRMED | CANCELLED"
+                },
+                {
+                  "key": "customerId",
+                  "value": "<uuid>",
+                  "description": "Filter by customer UUID"
+                }
               ]
             },
             "description": "Lists challans with pagination and optional status/customer filters. All authenticated roles can access."
@@ -287,12 +732,27 @@
           "name": "GET /challans/:id",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/challans/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["challans",":id"],
-              "variable": [{ "key": "id", "value": "<challan-uuid>" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "challans",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<challan-uuid>"
+                }
+              ]
             },
             "description": "Returns full challan detail including customer info, creator info, and all line items with their locked snapshot data."
           }
@@ -301,12 +761,28 @@
           "name": "PUT /challans/:id/confirm",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/challans/:id/confirm",
-              "host": ["{{baseUrl}}"],
-              "path": ["challans",":id","confirm"],
-              "variable": [{ "key": "id", "value": "<challan-uuid>" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "challans",
+                ":id",
+                "confirm"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<challan-uuid>"
+                }
+              ]
             },
             "description": "Confirms a DRAFT challan. Requires ADMIN or SALES role.\n\nThis operation runs inside a database transaction:\n1. Verifies all items have sufficient stock.\n2. If any item is short, the entire operation is rolled back and a 400 is returned with the specific shortage details.\n3. On success, deducts stock from each product, creates OUT StockMovement records, and marks the challan CONFIRMED."
           }
@@ -315,14 +791,60 @@
           "name": "PUT /challans/:id/cancel",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/challans/:id/cancel",
-              "host": ["{{baseUrl}}"],
-              "path": ["challans",":id","cancel"],
-              "variable": [{ "key": "id", "value": "<challan-uuid>" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "challans",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<challan-uuid>"
+                }
+              ]
             },
             "description": "Cancels a DRAFT or CONFIRMED challan. Requires ADMIN or SALES role.\n\n- Cancelling a DRAFT: just marks it CANCELLED, no inventory effect.\n- Cancelling a CONFIRMED: runs inside a transaction to restore each item's quantity back to product stock and creates IN StockMovement records."
+          }
+        },
+        {
+          "name": "GET /challans/:id/pdf",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans/:id/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "challans",
+                ":id",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<challan-uuid>"
+                }
+              ]
+            },
+            "description": "Generates and returns a PDF invoice for a CONFIRMED challan. All authenticated roles can access."
           }
         }
       ]
