@@ -1,0 +1,74 @@
+# docker-compose.yml — local Docker orchestration for fundsroom-erp-crm
+# Usage: docker-compose up --build
+#
+# ??  Production uses Neon (DATABASE_URL from .env).
+#     This compose file spins up a local postgres only for local Docker testing.
+#     Set USE_LOCAL_PG=true (or just leave DATABASE_URL blank) to use it.
+
+services:
+  # -- PostgreSQL (local-only) -------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: fundsroom_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fundsroom}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fundsroom_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-fundsroom}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fundsroom} -d ${POSTGRES_DB:-fundsroom}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # -- Backend (Express + Prisma) ----------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fundsroom_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Point to local postgres for this compose stack.
+      # Override DATABASE_URL in a .env file to use Neon or another remote DB.
+      DATABASE_URL: ${DATABASE_URL:-postgresql://fundsroom:fundsroom_secret@postgres:5432/fundsroom?schema=public}
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      PORT: ${PORT:-5000}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:80}
+      NODE_ENV: ${NODE_ENV:-production}
+    ports:
+      - "${PORT:-5000}:${PORT:-5000}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${PORT:-5000}/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # -- Frontend (Vite build ? nginx) -------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # The browser calls this URL directly, so it must be reachable from the
+        # user's machine — not from inside the Docker network.
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5000}
+    container_name: fundsroom_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
