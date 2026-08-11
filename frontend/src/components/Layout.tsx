@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 interface NavItem {
@@ -58,7 +58,7 @@ interface SidebarProps {
 function Sidebar({ open, hovered, onClose, onHoverStart, onHoverEnd, isMobile, isTablet }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+
 
   const handleLogout = () => {
     logout();
