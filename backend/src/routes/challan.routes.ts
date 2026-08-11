@@ -2,11 +2,11 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { PrismaClient, ChallanStatus, MovementType } from '@prisma/client';
 import { z } from 'zod';
 import { requireAuth, requireRole } from '../middleware/auth';
+import PDFDocument from 'pdfkit';
 
 const router = Router();
 const prisma = new PrismaClient();
 
-// Schemas
 const createChallanSchema = z.object({
   customerId: z.string().uuid('Valid customer ID is required'),
   items: z.array(
@@ -17,7 +17,6 @@ const createChallanSchema = z.object({
   ).min(1, 'At least one item is required')
 });
 
-// 1. POST /challans (Create DRAFT)
 router.post('/', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const parseResult = createChallanSchema.safeParse(req.body);
@@ -28,14 +27,12 @@ router.post('/', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request
 
     const { customerId, items } = parseResult.data;
 
-    // Check customer exists
     const customer = await prisma.customer.findUnique({ where: { id: customerId } });
     if (!customer) {
       res.status(404).json({ success: false, error: 'Customer not found' });
       return;
     }
 
-    // Fetch products to capture snapshot
     const productIds = items.map(item => item.productId);
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } }
@@ -46,7 +43,6 @@ router.post('/', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request
       return;
     }
 
-    // Create a map for quick lookup
     const productMap = new Map(products.map(p => [p.id, p]));
 
     let totalQuantity = 0;
@@ -87,7 +83,6 @@ router.post('/', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request
   }
 });
 
-// 2. PUT /challans/:id/confirm (Confirm Challan)
 router.put('/:id/confirm', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const challanId = req.params.id as string;
@@ -107,11 +102,7 @@ router.put('/:id/confirm', requireAuth, requireRole('ADMIN', 'SALES'), async (re
           throw new Error('NOT_DRAFT');
         }
 
-        // Fetch current products for these items to check stock
         const productIds = challan.challanItems.map(item => item.productId);
-        
-        // Ensure we lock these rows for update? We can use queryRaw for FOR UPDATE if strictly necessary,
-        // but let's just rely on transaction isolation and application level checks for now, or just basic fetch.
         const products = await tx.product.findMany({
           where: { id: { in: productIds } }
         });
@@ -119,26 +110,23 @@ router.put('/:id/confirm', requireAuth, requireRole('ADMIN', 'SALES'), async (re
         const productMap = new Map(products.map(p => [p.id, p]));
         const insufficientProducts: string[] = [];
 
-        // Check stock
         for (const item of challan.challanItems) {
           const product = productMap.get(item.productId);
           if (!product) {
-             throw new Error('PRODUCT_NOT_FOUND');
+            throw new Error('PRODUCT_NOT_FOUND');
           }
           if (product.currentStock < item.quantity) {
-             insufficientProducts.push(`${product.name} (SKU: ${product.sku}) - Requested: ${item.quantity}, Available: ${product.currentStock}`);
+            insufficientProducts.push(`${product.name} (SKU: ${product.sku}) - Requested: ${item.quantity}, Available: ${product.currentStock}`);
           }
         }
 
         if (insufficientProducts.length > 0) {
-          // Pass the list through the error message
           throw new Error(`INSUFFICIENT_STOCK||${JSON.stringify(insufficientProducts)}`);
         }
 
-        // Deduct stock and create StockMovement
         for (const item of challan.challanItems) {
           const product = productMap.get(item.productId)!;
-          
+
           await tx.product.update({
             where: { id: item.productId },
             data: { currentStock: product.currentStock - item.quantity }
@@ -174,8 +162,8 @@ router.put('/:id/confirm', requireAuth, requireRole('ADMIN', 'SALES'), async (re
         res.status(400).json({ success: false, error: 'One or more products no longer exist' });
       } else if (txError.message.startsWith('INSUFFICIENT_STOCK||')) {
         const issues = JSON.parse(txError.message.split('||')[1]);
-        res.status(400).json({ 
-          success: false, 
+        res.status(400).json({
+          success: false,
           error: 'Insufficient stock for one or more items',
           details: issues
         });
@@ -188,7 +176,6 @@ router.put('/:id/confirm', requireAuth, requireRole('ADMIN', 'SALES'), async (re
   }
 });
 
-// 3. PUT /challans/:id/cancel (Cancel Challan)
 router.put('/:id/cancel', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const challanId = req.params.id as string;
@@ -209,7 +196,6 @@ router.put('/:id/cancel', requireAuth, requireRole('ADMIN', 'SALES'), async (req
         }
 
         if (challan.status === ChallanStatus.CONFIRMED) {
-          // Restore stock
           const productIds = challan.challanItems.map(item => item.productId);
           const products = await tx.product.findMany({
             where: { id: { in: productIds } }
@@ -218,7 +204,7 @@ router.put('/:id/cancel', requireAuth, requireRole('ADMIN', 'SALES'), async (req
 
           for (const item of challan.challanItems) {
             const product = productMap.get(item.productId);
-            if (product) { // If product was deleted, we might skip restoring stock or throw error. Let's just restore if it exists.
+            if (product) {
               await tx.product.update({
                 where: { id: item.productId },
                 data: { currentStock: product.currentStock + item.quantity }
@@ -237,7 +223,6 @@ router.put('/:id/cancel', requireAuth, requireRole('ADMIN', 'SALES'), async (req
           }
         }
 
-        // Both DRAFT and CONFIRMED get marked as CANCELLED
         const updatedChallan = await tx.challan.update({
           where: { id: challanId },
           data: { status: ChallanStatus.CANCELLED },
@@ -262,7 +247,6 @@ router.put('/:id/cancel', requireAuth, requireRole('ADMIN', 'SALES'), async (req
   }
 });
 
-// 4. GET /challans (List)
 router.get('/', requireAuth, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
@@ -305,7 +289,6 @@ router.get('/', requireAuth, async (req: Request, res: Response, next: NextFunct
   }
 });
 
-// 5. GET /challans/:id (Detail)
 router.get('/:id', requireAuth, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = req.params.id as string;
@@ -324,6 +307,108 @@ router.get('/:id', requireAuth, async (req: Request, res: Response, next: NextFu
     }
 
     res.json({ success: true, data: challan });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/:id/pdf', requireAuth, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    const challan = await prisma.challan.findUnique({
+      where: { id },
+      include: {
+        customer: true,
+        user: { select: { id: true, name: true, role: true } },
+        challanItems: true,
+      },
+    });
+
+    if (!challan) {
+      res.status(404).json({ success: false, error: 'Challan not found' });
+      return;
+    }
+
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="invoice-${challan.challanNumber}.pdf"`);
+    doc.pipe(res);
+
+    const primaryColor = '#5B21B6';
+    const lightGray = '#F8FAFC';
+    const darkGray = '#1E293B';
+    const midGray = '#64748B';
+
+    doc.rect(0, 0, doc.page.width, 100).fill(primaryColor);
+    doc.fillColor('#FFFFFF').fontSize(26).font('Helvetica-Bold').text('INVOICE', 50, 30);
+    doc.fontSize(10).font('Helvetica').text('FundsRoom ERP+CRM', 50, 62);
+    doc.text('operations@fundsroom.com', 50, 76);
+
+    const headerRightX = doc.page.width - 200;
+    doc.fontSize(10).text(`Challan #: ${challan.challanNumber}`, headerRightX, 30, { width: 150, align: 'right' });
+    doc.text(`Date: ${new Date(challan.createdAt).toLocaleDateString('en-IN')}`, headerRightX, 46, { width: 150, align: 'right' });
+    doc.text(`Status: ${challan.status}`, headerRightX, 62, { width: 150, align: 'right' });
+    doc.text(`Created by: ${challan.user?.name ?? '-'}`, headerRightX, 78, { width: 150, align: 'right' });
+
+    doc.fillColor(darkGray);
+    let y = 120;
+
+    doc.rect(50, y, doc.page.width - 100, 80).fill(lightGray).stroke('#E2E8F0');
+    doc.fillColor(midGray).fontSize(8).font('Helvetica-Bold').text('BILL TO', 65, y + 10);
+    doc.fillColor(darkGray).fontSize(12).font('Helvetica-Bold').text(challan.customer?.name ?? '-', 65, y + 24);
+    doc.fontSize(10).font('Helvetica').fillColor(midGray);
+    if (challan.customer?.businessName) doc.text(challan.customer.businessName, 65, y + 40);
+    if (challan.customer?.mobile) doc.text(`Phone: ${challan.customer.mobile}`, 65, y + 54);
+    if (challan.customer?.gstNumber) doc.text(`GST: ${challan.customer.gstNumber}`, 65, y + 54 + (challan.customer.businessName ? 14 : 0));
+
+    y += 96;
+
+    const colWidths = [220, 80, 80, 70, 80];
+    const colHeaders = ['Product', 'SKU', 'Unit Price', 'Qty', 'Line Total'];
+    const colX = [50];
+    colWidths.slice(0, -1).forEach((w, i) => colX.push(colX[i] + w));
+
+    doc.rect(50, y, doc.page.width - 100, 24).fill(primaryColor);
+    doc.fillColor('#FFFFFF').fontSize(8).font('Helvetica-Bold');
+    colHeaders.forEach((h, i) => {
+      const align = i >= 2 ? 'right' : 'left';
+      doc.text(h, colX[i] + 4, y + 8, { width: colWidths[i] - 8, align });
+    });
+
+    y += 24;
+    let totalAmount = 0;
+
+    challan.challanItems.forEach((item, idx) => {
+      const unitPrice = parseFloat(item.unitPriceSnapshot.toString());
+      const lineTotal = unitPrice * item.quantity;
+      totalAmount += lineTotal;
+
+      const rowBg = idx % 2 === 0 ? '#FFFFFF' : lightGray;
+      doc.rect(50, y, doc.page.width - 100, 22).fill(rowBg).stroke('#E2E8F0');
+      doc.fillColor(darkGray).fontSize(9).font('Helvetica');
+
+      doc.text(item.productNameSnapshot, colX[0] + 4, y + 6, { width: colWidths[0] - 8 });
+      doc.text(item.productSkuSnapshot, colX[1] + 4, y + 6, { width: colWidths[1] - 8, align: 'right' });
+      doc.text(`Rs.${unitPrice.toFixed(2)}`, colX[2] + 4, y + 6, { width: colWidths[2] - 8, align: 'right' });
+      doc.text(String(item.quantity), colX[3] + 4, y + 6, { width: colWidths[3] - 8, align: 'right' });
+      doc.text(`Rs.${lineTotal.toFixed(2)}`, colX[4] + 4, y + 6, { width: colWidths[4] - 8, align: 'right' });
+      y += 22;
+    });
+
+    doc.rect(50, y, doc.page.width - 100, 28).fill('#1E293B');
+    doc.fillColor('#FFFFFF').fontSize(10).font('Helvetica-Bold');
+    doc.text('TOTAL', colX[0] + 4, y + 8, { width: colWidths[0] + colWidths[1] + colWidths[2], align: 'left' });
+    doc.text(String(challan.totalQuantity), colX[3] + 4, y + 8, { width: colWidths[3] - 8, align: 'right' });
+    doc.text(`Rs.${totalAmount.toFixed(2)}`, colX[4] + 4, y + 8, { width: colWidths[4] - 8, align: 'right' });
+    y += 40;
+
+    doc.fillColor(midGray).fontSize(8).font('Helvetica').text(
+      'Thank you for your business. This is a system-generated document.',
+      50, y, { align: 'center', width: doc.page.width - 100 }
+    );
+
+    doc.end();
   } catch (error) {
     next(error);
   }

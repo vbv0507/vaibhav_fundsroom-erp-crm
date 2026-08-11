@@ -1,6 +1,4 @@
-// ──────────────────────────────────────────────
-// Shared domain types matching the Prisma schema
-// ──────────────────────────────────────────────
+
 
 export type CustomerType = 'RETAIL' | 'WHOLESALE' | 'DISTRIBUTOR';
 export type CustomerStatus = 'LEAD' | 'ACTIVE' | 'INACTIVE';
@@ -51,6 +49,7 @@ export interface Product {
   currentStock: number;
   minStockAlert: number;
   location: string | null;
+  imageUrl: string | null;
   createdAt: string;
   stockMovements?: StockMovement[];
 }
@@ -61,8 +60,6 @@ export interface PaginatedMeta {
   limit: number;
   totalPages: number;
 }
-
-// ─── Challan ──────────────────────────────────────────────────────────────────
 
 export type ChallanStatus = 'DRAFT' | 'CONFIRMED' | 'CANCELLED';
 
@@ -87,4 +84,14 @@ export interface Challan {
   customer?: { id: string; name: string; businessName: string | null };
   user?: { id: string; name: string; role: string };
   challanItems?: ChallanItem[];
+}
+
+export type UserRole = 'ADMIN' | 'SALES' | 'WAREHOUSE' | 'ACCOUNTS';
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  createdAt: string;
 }
