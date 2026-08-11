@@ -5,14 +5,10 @@ import Modal from '../components/Modal';
 import { useDebounce } from '../hooks/useDebounce';
 import type { Product, StockMovement, MovementType, PaginatedMeta } from '../types';
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
-
 const MOVEMENT_BADGE: Record<MovementType, string> = {
   IN: 'bg-emerald-100 text-emerald-700',
   OUT: 'bg-red-100 text-red-700',
 };
-
-// ─── Form types ────────────────────────────────────────────────────────────────
 
 interface ProductForm {
   name: string;
@@ -46,8 +42,6 @@ const EMPTY_MOVEMENT_FORM: MovementForm = {
   reason: '',
 };
 
-// ─── Shared input style ────────────────────────────────────────────────────────
-
 const inputCls =
   'w-full px-3 py-2 rounded-lg border border-slate-300 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 placeholder-slate-400';
 
@@ -71,8 +65,6 @@ function FormField({
     </div>
   );
 }
-
-// ─── Product Form Content ─────────────────────────────────────────────────────
 
 function ProductFormContent({
   form,
@@ -123,13 +115,10 @@ function ProductFormContent({
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
-
 export default function Products() {
   const { user } = useAuth();
   const canWrite = user?.role === 'ADMIN' || user?.role === 'WAREHOUSE';
 
-  // List state
   const [products, setProducts] = useState<Product[]>([]);
   const [meta, setMeta] = useState<PaginatedMeta>({ total: 0, page: 1, limit: 10, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -141,7 +130,6 @@ export default function Products() {
 
   useDebounce(search, 350, setDebouncedSearch);
 
-  // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
@@ -153,8 +141,6 @@ export default function Products() {
   const [productForm, setProductForm] = useState<ProductForm>(EMPTY_PRODUCT_FORM);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
-
-  // ─── Fetch list ────────────────────────────────────────────────────────────
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -182,16 +168,12 @@ export default function Products() {
     setPage(1);
   }, [debouncedSearch, categoryFilter, lowStockOnly]);
 
-  // ─── Open detail ───────────────────────────────────────────────────────────
-
   const openDetail = async (p: Product) => {
     const res = await api.get(`/products/${p.id}`);
     setDetailProduct(res.data.data as Product);
     setMovementForm(EMPTY_MOVEMENT_FORM);
     setMovementError('');
   };
-
-  // ─── Product form helpers ──────────────────────────────────────────────────
 
   const handleProductChange = (e: ChangeEvent<HTMLInputElement>) => {
     setProductForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -232,7 +214,7 @@ export default function Products() {
         location: productForm.location,
       };
       if (editProduct) {
-        // Don't send currentStock to edit
+
         const { currentStock: _cs, ...editPayload } = payload;
         void _cs;
         await api.put(`/products/${editProduct.id}`, editPayload);
@@ -250,8 +232,6 @@ export default function Products() {
     }
   };
 
-  // ─── Stock movement ────────────────────────────────────────────────────────
-
   const submitMovement = async (e: FormEvent) => {
     e.preventDefault();
     if (!detailProduct) return;
@@ -263,7 +243,7 @@ export default function Products() {
         movementType: movementForm.movementType,
         reason: movementForm.reason || undefined,
       });
-      // Refresh detail
+
       const res = await api.get(`/products/${detailProduct.id}`);
       setDetailProduct(res.data.data as Product);
       setMovementForm(EMPTY_MOVEMENT_FORM);
@@ -277,11 +257,9 @@ export default function Products() {
     }
   };
 
-  // ─── Render ────────────────────────────────────────────────────────────────
-
   return (
     <div className="space-y-5">
-      {/* Header */}
+      
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800">Products</h2>
@@ -297,7 +275,6 @@ export default function Products() {
         )}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
@@ -324,7 +301,6 @@ export default function Products() {
         </label>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-slate-400">
@@ -386,7 +362,6 @@ export default function Products() {
           </div>
         )}
 
-        {/* Pagination */}
         {!loading && meta.totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-slate-50 text-sm text-slate-500">
             <span>Page {meta.page} of {meta.totalPages} ({meta.total} records)</span>
@@ -402,7 +377,6 @@ export default function Products() {
         )}
       </div>
 
-      {/* ─── Add Modal ───────────────────────────────────────────────────────── */}
       {showAddModal && (
         <Modal title="Add Product" onClose={() => setShowAddModal(false)}>
           <form onSubmit={(e) => void submitProductForm(e)} className="space-y-4">
@@ -418,7 +392,6 @@ export default function Products() {
         </Modal>
       )}
 
-      {/* ─── Edit Modal ──────────────────────────────────────────────────────── */}
       {editProduct && (
         <Modal title={`Edit — ${editProduct.name}`} onClose={() => setEditProduct(null)}>
           <form onSubmit={(e) => void submitProductForm(e)} className="space-y-4">
@@ -434,11 +407,10 @@ export default function Products() {
         </Modal>
       )}
 
-      {/* ─── Detail Modal ────────────────────────────────────────────────────── */}
       {detailProduct && (
         <Modal title={detailProduct.name} onClose={() => setDetailProduct(null)} width="max-w-2xl">
           <div className="space-y-5">
-            {/* Info grid */}
+            
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
               {[
                 ['SKU', detailProduct.sku],
@@ -455,7 +427,6 @@ export default function Products() {
               ))}
             </div>
 
-            {/* Action buttons */}
             {canWrite && (
               <div className="flex gap-2">
                 <button onClick={() => { openEdit(detailProduct); setDetailProduct(null); }} className="text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors">
@@ -470,7 +441,6 @@ export default function Products() {
               </div>
             )}
 
-            {/* Stock Movements table */}
             <div>
               <h3 className="text-sm font-semibold text-slate-700 mb-3">Recent Stock Movements</h3>
               {(detailProduct.stockMovements ?? []).length === 0 ? (
@@ -510,7 +480,6 @@ export default function Products() {
         </Modal>
       )}
 
-      {/* ─── Stock Movement Modal ────────────────────────────────────────────── */}
       {detailProduct && showMovementModal && (
         <Modal title="Record Stock Movement" onClose={() => setShowMovementModal(false)}>
           <form onSubmit={(e) => void submitMovement(e)} className="space-y-4">
@@ -524,7 +493,6 @@ export default function Products() {
               <span className="font-semibold text-slate-800">{detailProduct.currentStock}</span> units
             </p>
 
-            {/* IN / OUT toggle */}
             <div>
               <p className="text-xs font-medium text-slate-600 mb-2">Movement Type</p>
               <div className="flex gap-2">

@@ -6,7 +6,6 @@ import { requireAuth, requireRole } from '../middleware/auth';
 const router = Router();
 const prisma = new PrismaClient();
 
-// Zod Schemas
 const customerSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   mobile: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid mobile number format'),
@@ -23,7 +22,6 @@ const noteSchema = z.object({
   text: z.string().min(1, 'Note text cannot be empty'),
 });
 
-// 1. POST /customers - Create a customer
 router.post('/', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const parseResult = customerSchema.safeParse(req.body);
@@ -33,7 +31,7 @@ router.post('/', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request
     }
 
     const data = parseResult.data;
-    
+
     const customer = await prisma.customer.create({
       data: {
         name: data.name,
@@ -54,7 +52,6 @@ router.post('/', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request
   }
 });
 
-// 2. GET /customers - List customers with pagination, search, filter
 router.get('/', requireAuth, requireRole('ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
@@ -66,7 +63,7 @@ router.get('/', requireAuth, requireRole('ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNT
     const type = req.query.type as CustomerType | undefined;
 
     const whereClause: any = {};
-    
+
     if (q) {
       whereClause.OR = [
         { name: { contains: q, mode: 'insensitive' } },
@@ -102,7 +99,6 @@ router.get('/', requireAuth, requireRole('ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNT
   }
 });
 
-// 3. GET /customers/:id - Full detail view
 router.get('/:id', requireAuth, requireRole('ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = req.params.id as string;
@@ -129,7 +125,6 @@ router.get('/:id', requireAuth, requireRole('ADMIN', 'SALES', 'WAREHOUSE', 'ACCO
   }
 });
 
-// 4. PUT /customers/:id - Edit customer
 router.put('/:id', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = req.params.id as string;
@@ -141,7 +136,6 @@ router.put('/:id', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Reque
 
     const data = parseResult.data;
 
-    // Verify exists first to return 404 cleanly
     const existing = await prisma.customer.findUnique({ where: { id } });
     if (!existing) {
       res.status(404).json({ success: false, error: 'Customer not found' });
@@ -169,7 +163,6 @@ router.put('/:id', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Reque
   }
 });
 
-// 5. POST /customers/:id/notes - Add a note
 router.post('/:id/notes', requireAuth, requireRole('ADMIN', 'SALES'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const id = req.params.id as string;

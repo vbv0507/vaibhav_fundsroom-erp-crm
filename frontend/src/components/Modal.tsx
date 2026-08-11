@@ -8,7 +8,7 @@ interface ModalProps {
 }
 
 export default function Modal({ title, onClose, children, width = 'max-w-lg' }: ModalProps) {
-  // Close on Escape
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -23,17 +23,16 @@ export default function Modal({ title, onClose, children, width = 'max-w-lg' }: 
       aria-modal="true"
       role="dialog"
     >
-      {/* Backdrop */}
+      
       <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Panel */}
       <div
         className={`relative bg-white rounded-2xl shadow-2xl w-full ${width} max-h-[90vh] flex flex-col`}
       >
-        {/* Header */}
+        
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0">
           <h2 className="text-base font-semibold text-slate-800">{title}</h2>
           <button
@@ -44,7 +43,6 @@ export default function Modal({ title, onClose, children, width = 'max-w-lg' }: 
           </button>
         </div>
 
-        {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 px-6 py-5">{children}</div>
       </div>
     </div>

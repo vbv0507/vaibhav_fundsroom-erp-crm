@@ -5,8 +5,6 @@ import Modal from '../components/Modal';
 import { useDebounce } from '../hooks/useDebounce';
 import type { Customer, CustomerType, CustomerStatus, CustomerNote, PaginatedMeta } from '../types';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const CUSTOMER_TYPES: CustomerType[] = ['RETAIL', 'WHOLESALE', 'DISTRIBUTOR'];
 const CUSTOMER_STATUSES: CustomerStatus[] = ['LEAD', 'ACTIVE', 'INACTIVE'];
 
@@ -21,8 +19,6 @@ const TYPE_BADGE: Record<CustomerType, string> = {
   WHOLESALE: 'bg-violet-50 text-violet-700',
   DISTRIBUTOR: 'bg-cyan-50 text-cyan-700',
 };
-
-// ─── Form default ─────────────────────────────────────────────────────────────
 
 interface CustomerForm {
   name: string;
@@ -47,8 +43,6 @@ const EMPTY_FORM: CustomerForm = {
   status: 'LEAD',
   followUpDate: '',
 };
-
-// ─── Sub-components ────────────────────────────────────────────────────────────
 
 function FormField({
   label,
@@ -76,8 +70,6 @@ const inputCls =
 
 const selectCls =
   'w-full px-3 py-2 rounded-lg border border-slate-300 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white';
-
-// ─── Customer Form ─────────────────────────────────────────────────────────────
 
 function CustomerFormContent({
   form,
@@ -133,13 +125,10 @@ function CustomerFormContent({
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
-
 export default function Customers() {
   const { user } = useAuth();
   const canWrite = user?.role === 'ADMIN' || user?.role === 'SALES';
 
-  // List state
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [meta, setMeta] = useState<PaginatedMeta>({ total: 0, page: 1, limit: 10, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -149,10 +138,8 @@ export default function Customers() {
   const [statusFilter, setStatusFilter] = useState<CustomerStatus | ''>('');
   const [typeFilter, setTypeFilter] = useState<CustomerType | ''>('');
 
-  // Debounce search
   useDebounce(search, 350, setDebouncedSearch);
 
-  // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
   const [detailCustomer, setDetailCustomer] = useState<Customer | null>(null);
@@ -161,10 +148,7 @@ export default function Customers() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
 
-  // Add form state
   const [form, setForm] = useState<CustomerForm>(EMPTY_FORM);
-
-  // ─── Fetch list ───────────────────────────────────────────────────────────
 
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
@@ -188,20 +172,15 @@ export default function Customers() {
     void fetchCustomers();
   }, [fetchCustomers]);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, statusFilter, typeFilter]);
-
-  // ─── Fetch detail ─────────────────────────────────────────────────────────
 
   const openDetail = async (c: Customer) => {
     const res = await api.get(`/customers/${c.id}`);
     setDetailCustomer(res.data.data as Customer);
     setNoteText('');
   };
-
-  // ─── Form helpers ─────────────────────────────────────────────────────────
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -260,8 +239,6 @@ export default function Customers() {
     }
   };
 
-  // ─── Add note ─────────────────────────────────────────────────────────────
-
   const submitNote = async (e: FormEvent) => {
     e.preventDefault();
     if (!detailCustomer || !noteText.trim()) return;
@@ -276,11 +253,9 @@ export default function Customers() {
     }
   };
 
-  // ─── Render ───────────────────────────────────────────────────────────────
-
   return (
     <div className="space-y-5">
-      {/* Page header */}
+      
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800">Customers</h2>
@@ -296,7 +271,6 @@ export default function Customers() {
         )}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
@@ -323,7 +297,6 @@ export default function Customers() {
         </select>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-slate-400">
@@ -380,7 +353,6 @@ export default function Customers() {
           </div>
         )}
 
-        {/* Pagination */}
         {!loading && meta.totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-slate-50 text-sm text-slate-500">
             <span>Page {meta.page} of {meta.totalPages} ({meta.total} records)</span>
@@ -404,7 +376,6 @@ export default function Customers() {
         )}
       </div>
 
-      {/* ─── Add Customer Modal ─────────────────────────────────────────────── */}
       {showAddModal && (
         <Modal title="Add Customer" onClose={() => setShowAddModal(false)}>
           <form onSubmit={(e) => void submitForm(e)} className="space-y-4">
@@ -426,7 +397,6 @@ export default function Customers() {
         </Modal>
       )}
 
-      {/* ─── Edit Customer Modal ────────────────────────────────────────────── */}
       {editCustomer && (
         <Modal title={`Edit — ${editCustomer.name}`} onClose={() => setEditCustomer(null)}>
           <form onSubmit={(e) => void submitForm(e)} className="space-y-4">
@@ -448,11 +418,10 @@ export default function Customers() {
         </Modal>
       )}
 
-      {/* ─── Detail Modal ───────────────────────────────────────────────────── */}
       {detailCustomer && (
         <Modal title={detailCustomer.name} onClose={() => setDetailCustomer(null)} width="max-w-2xl">
           <div className="space-y-5">
-            {/* Info grid */}
+            
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
               {[
                 ['Mobile', detailCustomer.mobile],
@@ -471,7 +440,6 @@ export default function Customers() {
               ))}
             </div>
 
-            {/* Edit button */}
             {canWrite && (
               <button
                 onClick={() => { openEdit(detailCustomer); setDetailCustomer(null); }}
@@ -481,7 +449,6 @@ export default function Customers() {
               </button>
             )}
 
-            {/* Notes */}
             <div>
               <h3 className="text-sm font-semibold text-slate-700 mb-3">Notes History</h3>
               {(detailCustomer.notes ?? []).length === 0 ? (
@@ -499,7 +466,6 @@ export default function Customers() {
                 </div>
               )}
 
-              {/* Add note (write roles only) */}
               {canWrite && (
                 <form onSubmit={(e) => void submitNote(e)} className="mt-4 flex gap-2">
                   <input

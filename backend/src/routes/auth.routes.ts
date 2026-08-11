@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { requireAuth, requireRole } from '../middleware/auth';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -17,10 +17,10 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction): P
   try {
     const parseResult = loginSchema.safeParse(req.body);
     if (!parseResult.success) {
-      res.status(400).json({ 
-        success: false, 
-        error: 'Validation failed', 
-        details: parseResult.error.issues 
+      res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: parseResult.error.issues
       });
       return;
     }

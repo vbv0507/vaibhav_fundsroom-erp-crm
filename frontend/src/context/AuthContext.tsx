@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
 
-  // On mount, if we have a stored token, restore session by calling /auth/me
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
     if (storedToken && !user) {
@@ -38,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setToken(storedToken);
         })
         .catch(() => {
-          // Token is invalid/expired — clear it
+
           localStorage.removeItem(TOKEN_KEY);
           setToken(null);
           delete api.defaults.headers.common['Authorization'];

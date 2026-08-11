@@ -13,7 +13,6 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Already logged in — redirect
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -40,9 +39,9 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-violet-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Card */}
+        
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* Header strip */}
+          
           <div className="bg-violet-600 px-8 py-6">
             <div className="flex items-center gap-3 mb-1">
               <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center text-white font-bold">
@@ -53,7 +52,6 @@ export default function Login() {
             <p className="text-violet-200 text-sm">Sign in to your operations account</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="px-8 py-7 space-y-5">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm flex items-start gap-2">
@@ -103,7 +101,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Demo Credentials */}
           <div className="border-t border-slate-100 bg-slate-50 px-8 py-4">
             <details className="group">
               <summary className="cursor-pointer text-center text-xs font-medium text-slate-500 hover:text-violet-600 transition-colors list-none flex items-center justify-center gap-1 [&::-webkit-details-marker]:hidden">

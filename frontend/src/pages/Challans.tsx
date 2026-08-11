@@ -18,8 +18,6 @@ import type {
   PaginatedMeta,
 } from '../types';
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
-
 const STATUS_BADGE: Record<ChallanStatus, { cls: string; label: string }> = {
   DRAFT: { cls: 'bg-slate-100 text-slate-600', label: 'Draft' },
   CONFIRMED: { cls: 'bg-emerald-100 text-emerald-700', label: 'Confirmed' },
@@ -28,8 +26,6 @@ const STATUS_BADGE: Record<ChallanStatus, { cls: string; label: string }> = {
 
 const inputCls =
   'w-full px-3 py-2 rounded-lg border border-slate-300 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 placeholder-slate-400';
-
-// ─── Searchable dropdown ───────────────────────────────────────────────────────
 
 interface SearchDropdownProps<T> {
   placeholder: string;
@@ -90,8 +86,6 @@ function SearchDropdown<T>({
   );
 }
 
-// ─── Challan builder item ──────────────────────────────────────────────────────
-
 interface LineItem {
   productId: string;
   productLabel: string;
@@ -106,13 +100,10 @@ const emptyLine = (): LineItem => ({
   quantity: '1',
 });
 
-// ─── Main page ─────────────────────────────────────────────────────────────────
-
 export default function Challans() {
   const { user } = useAuth();
   const canWrite = user?.role === 'ADMIN' || user?.role === 'SALES';
 
-  // ─── List state ────────────────────────────────────────────────────────────
   const [challans, setChallans] = useState<Challan[]>([]);
   const [meta, setMeta] = useState<PaginatedMeta>({ total: 0, page: 1, limit: 10, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -126,13 +117,11 @@ export default function Challans() {
 
   useDebounce(customerSearch, 350, setDebouncedCustomerSearch);
 
-  // Fetch customers for filter
   useEffect(() => {
     if (!debouncedCustomerSearch) { setFilterCustomers([]); return; }
     void api.get(`/customers?q=${debouncedCustomerSearch}&limit=8`).then((r) => setFilterCustomers(r.data.data));
   }, [debouncedCustomerSearch]);
 
-  // ─── Fetch challans ────────────────────────────────────────────────────────
   const fetchChallans = useCallback(async () => {
     setLoading(true);
     try {
@@ -152,7 +141,6 @@ export default function Challans() {
   useEffect(() => { void fetchChallans(); }, [fetchChallans]);
   useEffect(() => { setPage(1); }, [statusFilter, filterCustomerId]);
 
-  // ─── Detail modal state ────────────────────────────────────────────────────
   const [detailChallan, setDetailChallan] = useState<Challan | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionError, setActionError] = useState<string | string[] | null>(null);
@@ -167,7 +155,6 @@ export default function Challans() {
     setDetailLoading(false);
   };
 
-  // ─── Confirm challan ───────────────────────────────────────────────────────
   const handleConfirm = async () => {
     if (!detailChallan) return;
     setActionLoading(true);
@@ -189,7 +176,6 @@ export default function Challans() {
     }
   };
 
-  // ─── Cancel challan ────────────────────────────────────────────────────────
   const handleCancel = async () => {
     if (!detailChallan) return;
     setCancelConfirmOpen(false);
@@ -207,7 +193,6 @@ export default function Challans() {
     }
   };
 
-  // ─── New challan form ──────────────────────────────────────────────────────
   const [showNewModal, setShowNewModal] = useState(false);
   const [newCustomerId, setNewCustomerId] = useState('');
   const [newCustomerLabel, setNewCustomerLabel] = useState('');
@@ -288,10 +273,9 @@ export default function Challans() {
     }
   };
 
-  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-5">
-      {/* Header */}
+      
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800">Sales Challans</h2>
@@ -307,7 +291,6 @@ export default function Challans() {
         )}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <select
           value={statusFilter}
@@ -360,7 +343,6 @@ export default function Challans() {
         )}
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-slate-400">
@@ -412,7 +394,6 @@ export default function Challans() {
           </div>
         )}
 
-        {/* Pagination */}
         {!loading && meta.totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-slate-50 text-sm text-slate-500">
             <span>Page {meta.page} of {meta.totalPages} ({meta.total} records)</span>
@@ -428,7 +409,6 @@ export default function Challans() {
         )}
       </div>
 
-      {/* ─── New Challan Modal ───────────────────────────────────────────────── */}
       {showNewModal && (
         <Modal title="New Sales Challan" onClose={() => setShowNewModal(false)} width="max-w-xl">
           <form onSubmit={(e) => void submitNew(e)} className="space-y-5">
@@ -438,7 +418,6 @@ export default function Challans() {
               </div>
             )}
 
-            {/* Customer selector */}
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1.5">
                 Customer <span className="text-red-400">*</span>
@@ -458,7 +437,6 @@ export default function Challans() {
               />
             </div>
 
-            {/* Product lines */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-medium text-slate-600">
@@ -469,7 +447,7 @@ export default function Challans() {
               <div className="space-y-3">
                 {lines.map((line, idx) => (
                   <div key={idx} className="flex gap-2 items-start">
-                    {/* Product search */}
+                    
                     <div className="flex-1 relative">
                       <input
                         type="text"
@@ -507,7 +485,6 @@ export default function Challans() {
                       )}
                     </div>
 
-                    {/* Quantity */}
                     <input
                       type="number"
                       min="1"
@@ -517,7 +494,6 @@ export default function Challans() {
                       placeholder="Qty"
                     />
 
-                    {/* Remove */}
                     {lines.length > 1 && (
                       <button
                         type="button"
@@ -556,7 +532,6 @@ export default function Challans() {
         </Modal>
       )}
 
-      {/* ─── Loading detail overlay ──────────────────────────────────────────── */}
       {detailLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40">
           <div className="bg-white rounded-xl px-8 py-6 flex items-center gap-3 shadow-lg">
@@ -566,7 +541,6 @@ export default function Challans() {
         </div>
       )}
 
-      {/* ─── Detail Modal ────────────────────────────────────────────────────── */}
       {detailChallan && !detailLoading && (
         <Modal
           title={`Challan — ${detailChallan.challanNumber}`}
@@ -574,7 +548,7 @@ export default function Challans() {
           width="max-w-2xl"
         >
           <div className="space-y-6">
-            {/* Status + meta */}
+            
             <div className="flex items-center gap-3">
               <span className={`text-sm font-semibold px-3 py-1.5 rounded-full ${STATUS_BADGE[detailChallan.status].cls}`}>
                 {STATUS_BADGE[detailChallan.status].label}
@@ -585,7 +559,6 @@ export default function Challans() {
               </span>
             </div>
 
-            {/* Insufficient stock error — must be prominent */}
             {actionError && (
               <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4">
                 <div className="flex items-start gap-3">
@@ -609,7 +582,6 @@ export default function Challans() {
               </div>
             )}
 
-            {/* Customer info */}
             <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Customer</p>
               <p className="text-slate-800 font-medium">{detailChallan.customer?.name}</p>
@@ -618,7 +590,6 @@ export default function Challans() {
               )}
             </div>
 
-            {/* Line items */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-slate-700">Line Items</h3>
@@ -662,7 +633,6 @@ export default function Challans() {
               </div>
             </div>
 
-            {/* Actions */}
             {canWrite && (
               <div className="pt-1">
                 {detailChallan.status === 'DRAFT' && (
@@ -685,7 +655,15 @@ export default function Challans() {
                 )}
 
                 {detailChallan.status === 'CONFIRMED' && (
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <a
+                      href={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/challans/${detailChallan.id}/pdf`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors"
+                    >
+                      <span>📥</span> Export PDF Invoice
+                    </a>
                     <button
                       onClick={() => setCancelConfirmOpen(true)}
                       disabled={actionLoading}
@@ -706,7 +684,6 @@ export default function Challans() {
               </div>
             )}
 
-            {/* Read-only notice for WAREHOUSE/ACCOUNTS */}
             {!canWrite && (
               <p className="text-xs text-slate-400 italic">You have read-only access to challans.</p>
             )}
@@ -714,7 +691,6 @@ export default function Challans() {
         </Modal>
       )}
 
-      {/* ─── Cancel confirmation modal ───────────────────────────────────────── */}
       {cancelConfirmOpen && detailChallan && (
         <Modal title="Confirm Cancellation" onClose={() => setCancelConfirmOpen(false)}>
           <div className="space-y-4">
