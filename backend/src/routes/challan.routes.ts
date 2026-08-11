@@ -364,7 +364,7 @@ router.get('/:id/pdf', requireAuth, async (req: Request, res: Response, next: Ne
 
     y += 96;
 
-    const colWidths = [220, 80, 80, 70, 80];
+    const colWidths = [195, 80, 85, 55, 80];
     const colHeaders = ['Product', 'SKU', 'Unit Price', 'Qty', 'Line Total'];
     const colX = [50];
     colWidths.slice(0, -1).forEach((w, i) => colX.push(colX[i] + w));
