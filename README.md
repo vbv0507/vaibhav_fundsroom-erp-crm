@@ -1,5 +1,7 @@
 # FundsRoom ERP+CRM
 
+**[🎥 Watch the Full Demo Video Here](https://drive.google.com/file/d/1Dv6dlxCOdwXZ3jvAwsct5nDM2zUGkn0H/view?usp=sharing)**
+
 A full-stack internal operations portal built for managing customers, products (inventory), and sales challans. The system enforces role-based access control across four roles — ADMIN, SALES, WAREHOUSE, and ACCOUNTS — with each role seeing and doing exactly what they're allowed to.
 
 ## Architecture

@@ -38,3 +38,6 @@ coverage/
 # Ensure Prisma migrations stay tracked
 !prisma/migrations/
 !/backend/prisma/migrations/
+
+# Demo scripts
+script.md
